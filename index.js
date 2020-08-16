@@ -1,16 +1,33 @@
-const express = require("express")
-const cors = require("cors")
-const axios = require("axios")
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
 
-const app = express()
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    process.exit(1);
+  });
 
-app.use(cors())
+const app = express();
 
-app.get("/api/dolar", async (req, res) => {
-  const { data } = await axios.get("https://www.cronista.com/MercadosOnline/json/getDinamicos.html?tipo=monedas&id=ARS&fechaDesde=03%2F04%2F2019&fechaHasta=05%2F04%2F2019&fbclid=IwAR1OYNeJr43aHlS8VxF_osCk21SEgzbrwBSqKpN8zGhq3eoXYFwSFIX65bI")
-    .catch(e => e)
+app.use(cors());
 
-  res.json(data)
-})
+app.get("/api/dolar", async (_req, res) => {
+  const { data } = await axios
+    .get("https://www.cronista.com/MercadosOnline/json/eccheader.json")
+    .catch((e) => e);
 
-app.listen(process.env.PORT || 4687)
+  if (!data) return res.status(500);
+
+  const { dolarbna, dolarblue } = data;
+
+  return res.status(200).json({
+    oficial: { compra: dolarbna.valorcompra, venta: dolarbna.valorventa },
+    blue: { compra: dolarblue.valorcompra, venta: dolarblue.valorventa },
+  });
+});
+
+app.listen(process.env.PORT || 4687);
