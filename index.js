@@ -17,17 +17,12 @@ app.use(cors());
 
 app.get("/api/dolar", async (_req, res) => {
   const { data } = await axios
-    .get("https://www.cronista.com/MercadosOnline/json/eccheader.json")
+    .get("https://mercados.ambito.com//home/general")
     .catch((e) => e);
 
   if (!data) return res.status(500);
 
-  const { dolarbna, dolarblue } = data;
-
-  return res.status(200).json({
-    oficial: { compra: dolarbna.valorcompra, venta: dolarbna.valorventa },
-    blue: { compra: dolarblue.valorcompra, venta: dolarblue.valorventa },
-  });
+  return res.status(200).json(data);
 });
 
 app.listen(process.env.PORT || 4687);
